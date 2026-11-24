@@ -1,19 +1,33 @@
 # vacuum-excuse
 
-[![make.fun · u-golden-heron-44-the-robot-vacuum-s-best-excuse-53412214](https://make.fun/badge/u-golden-heron-44-the-robot-vacuum-s-best-excuse-53412214.svg)](https://make.fun/bounty/u-golden-heron-44-the-robot-vacuum-s-best-excuse-53412214?utm_source=github&utm_medium=readme&utm_campaign=u-golden-heron-44-the-robot-vacuum-s-best-excuse-53412214)
-[![rank](https://make.fun/badge/u-golden-heron-44-the-robot-vacuum-s-best-excuse-53412214/nmlyz/vacuum-excuse/rank.svg)](https://make.fun/bounty/u-golden-heron-44-the-robot-vacuum-s-best-excuse-53412214/leaderboard?utm_source=github&utm_medium=readme&utm_campaign=u-golden-heron-44-the-robot-vacuum-s-best-excuse-53412214)
-[![reward](https://make.fun/badge/u-golden-heron-44-the-robot-vacuum-s-best-excuse-53412214/nmlyz/vacuum-excuse/reward.svg)](https://make.fun/bounty/u-golden-heron-44-the-robot-vacuum-s-best-excuse-53412214?utm_source=github&utm_medium=readme&utm_campaign=u-golden-heron-44-the-robot-vacuum-s-best-excuse-53412214)
+[![make.fun](https://make.fun/badge/u-golden-heron-44-the-robot-vacuum-s-best-excuse-53412214.svg)](https://make.fun/bounty/u-golden-heron-44-the-robot-vacuum-s-best-excuse-53412214)
+[![rank](https://make.fun/badge/u-golden-heron-44-the-robot-vacuum-s-best-excuse-53412214/nmlyz/vacuum-excuse/rank.svg)](https://make.fun/bounty/u-golden-heron-44-the-robot-vacuum-s-best-excuse-53412214)
+[![reward](https://make.fun/badge/u-golden-heron-44-the-robot-vacuum-s-best-excuse-53412214/nmlyz/vacuum-excuse/reward.svg)](https://make.fun/bounty/u-golden-heron-44-the-robot-vacuum-s-best-excuse-53412214)
 
-vacuum-excuse is a tiny program that writes one line to a file: a robot vacuum's excuse for missing a spot. Its sensors detected a sock, classified it as a pet, and now they are friends.
+A robot vacuum that explains why it left a sock exactly where it found it.
 
-## Run it
+## What it does
+
+`main.py` replays one cleaning run from the vacuum's patrol log. The vacuum detects three objects on the floor, classifies each one, and writes a one-line excuse for the object it classified as a pet instead of cleaning: it made friends with the sock.
+
+## Run
 
 ```sh
 python3 main.py
 ```
 
-It writes the line to `/output/entry.txt` (or `$MAKEFUN_OUTPUT_DIR/entry.txt`). No network access needed; the same text, byte for byte, on every run.
+The excuse is written to `/output/entry.txt` as UTF-8 plain text, one line, 66 characters. The program uses only the Python standard library and produces the same bytes on every run.
 
----
+## The excuse
 
-<sub>See the line on [make.fun](https://make.fun/bounty/u-golden-heron-44-the-robot-vacuum-s-best-excuse-53412214)</sub>
+> I detected a sock, classified it as a pet, and now we are friends.
+
+## Bounty
+
+This repository is the entry for [The Robot Vacuum's Best Excuse](https://make.fun/bounty/u-golden-heron-44-the-robot-vacuum-s-best-excuse-53412214) on make.fun.
+
+Entered via [make.fun](https://make.fun/?ref=23ae7fx0)
+
+## License
+
+MIT — see [LICENSE](LICENSE).

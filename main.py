@@ -1,83 +1,85 @@
-#!/usr/bin/env python3
-"""vacuum-excuse: write one line, a robot vacuum's excuse for missing a spot.
+"""Vacuum excuse: the robot vacuum explains why the sock survived.
 
-The line is the vacuum's own account of a cleaning failure: its sensors
-found a sock, its classifier decided the sock was a pet, and the vacuum
-has been on friendly terms with it ever since. The joke turns on the last
-few words, when a classification error becomes a friendship.
+A robot vacuum patrols the floor, detects objects, and classifies each one
+before deciding whether to clean around it or swallow it. This program
+replays the vacuum's patrol log for one cleaning run and writes the excuse
+it gives for the single object it refused to touch, as one line of text.
 
-Standard library only, no network. Deterministic: the same bytes on every run.
+Run: python3 main.py
+Output: /output/entry.txt (UTF-8, one line, 1-140 characters)
 """
 
 import os
-import sys
 
-# The line is built from three clauses, one per beat of the story, so each
-# beat can be checked on its own: the detection, the misclassification,
-# then the friendship that turns it into an excuse.
-CLAUSES = (
-    "I detected a sock,",
-    "classified it as a pet,",
-    "and now we are friends.",
-)
+OUTPUT_PATH = "/output/entry.txt"
+MAX_CHARS = 140
 
-LINE = " ".join(CLAUSES)
+# What the vacuum's camera saw, in the order it saw it. Each entry is
+# (object name, where it was found).
+PATROL_LOG = [
+    ("dust bunny", "under the sofa"),
+    ("sock", "middle of the living room"),
+    ("charging cable", "beside the desk"),
+]
 
-MIN_LEN = 1
-MAX_LEN = 140
-
-
-def problems(text: str) -> list:
-    """Return every gate violation for the entry text (empty means valid)."""
-    found = []
-    if not (MIN_LEN <= len(text) <= MAX_LEN):
-        found.append(f"entry is {len(text)} code points, must be {MIN_LEN}-{MAX_LEN}")
-    stripped = text.strip()
-    if not stripped:
-        found.append("entry must not be only white space")
-    if text != stripped:
-        found.append("entry must not start or end with white space")
-    if "\n" in text or "\r" in text:
-        found.append("entry must be a single line")
-    if not stripped.endswith("."):
-        found.append("entry must end as one sentence")
-    return found
+# The vacuum's classifier: object name -> what the vacuum thinks it is.
+# Anything it cannot place with confidence is treated as furniture.
+CLASSIFICATIONS = {
+    "dust bunny": "dirt",
+    "sock": "pet",
+    "charging cable": "snake",
+}
 
 
-def main() -> int:
-    if len(CLAUSES) != 3:
-        print("line must be built from exactly three clauses", file=sys.stderr)
-        return 1
-    text = LINE
-    if "  " in text:
-        print("line must not contain a double space", file=sys.stderr)
-        return 1
-    bad = problems(text)
-    if bad:
-        for item in bad:
-            print(item, file=sys.stderr)
-        return 1
-    out_dir = os.environ.get("MAKEFUN_OUTPUT_DIR") or "/output"
-    os.makedirs(out_dir, exist_ok=True)
-    path = os.path.join(out_dir, "entry.txt")
-    with open(path, "w", encoding="utf-8", newline="\n") as f:
+def classify(object_name):
+    """Return what the vacuum believes an object is."""
+    return CLASSIFICATIONS.get(object_name, "furniture")
+
+
+def excuse_for(object_name):
+    """Build the vacuum's excuse for refusing to clean an object.
+
+    The vacuum only apologises for objects it classified as a pet: those
+    are the ones it befriended instead of cleaning.
+    """
+    label = classify(object_name)
+    if label != "pet":
+        return None
+    return "I detected a {0}, classified it as a {1}, and now we are friends.".format(
+        object_name, label
+    )
+
+
+def build_excuse():
+    """Find the first pet in the patrol log and return its excuse."""
+    for object_name, _location in PATROL_LOG:
+        excuse = excuse_for(object_name)
+        if excuse is not None:
+            return excuse
+    raise ValueError("no pet found in the patrol log")
+
+
+def write_entry(text):
+    """Write the excuse to OUTPUT_PATH as UTF-8, mode 0644.
+
+    The /output directory is created when missing but never chmodded.
+    The file holds exactly the excuse bytes: no trailing newline.
+    """
+    if not 1 <= len(text) <= MAX_CHARS:
+        raise ValueError("entry must be 1-140 characters, got %d" % len(text))
+    os.makedirs(os.path.dirname(OUTPUT_PATH), exist_ok=True)
+    with open(OUTPUT_PATH, "w", encoding="utf-8", newline="") as f:
         f.write(text)
-    # chmod is best-effort: in the grading sandbox /output is a root-owned
-    # mount and the program runs as uid 65534, so chmod there raises EPERM.
-    # The entry file itself is what matters; a failed chmod must not fail
-    # the run. (The output directory itself is never chmodded or removed.)
-    try:
-        os.chmod(path, 0o644)
-    except OSError:
-        pass
-    # Read the file back as bytes and confirm they match the line exactly.
-    with open(path, "rb") as f:
-        if f.read() != text.encode("utf-8"):
-            print("entry.txt does not match the line", file=sys.stderr)
-            return 1
-    print(f"wrote {len(text)} characters to {path}")
-    return 0
+    os.chmod(OUTPUT_PATH, 0o644)
+    return OUTPUT_PATH
+
+
+def main():
+    excuse = build_excuse()
+    path = write_entry(excuse)
+    print(excuse)
+    print("%s: %d characters" % (path, len(excuse)))
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    main()
